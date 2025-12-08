@@ -4,18 +4,8 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords 
 from nltk.stem import WordNetLemmatizer
 from collections import Counter
-import nltk
-nltk.download('punkt')
 
 stop_words = set(stopwords.words('english')) # initialiseren van stopwoorden met Engelse stopwoorden
-# uitbreiden met Nederlandse stopwoorden en domeinspecifieke woorden
-stop_words.update(stopwords.words('dutch'))
-custom_stopwords = {
-    'klacht', 'klachten', 'bedrijf', 'afdeling', 'meneer', 'mevrouw',
-    'goedemiddag', 'geachte', 'dank', 'danku', 'alvast', 'vriendelijke',
-    'groet', 'met', 'betreft', 'onderwerp'
-}
-stop_words.update(custom_stopwords)
 lemmatizer = WordNetLemmatizer() # initialiseren van lemmatizer met WordNetLemmatizer
 
 def preprocess_text(text):
