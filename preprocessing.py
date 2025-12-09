@@ -94,7 +94,7 @@ SLEUTELWOORDEN = {
         'cashback',
     ],
     'consumentenkrediet': [
-        'loan',
+        
         'vehicle',
         'auto',
         'car',
