@@ -1,49 +1,161 @@
-import pandas as pd 
-import re 
+import pandas as pd
+import numpy as np
+import re
 from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords 
+from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-from collections import Counter
+import nltk
+from scipy import sparse
+from sklearn.preprocessing import FunctionTransformer
 
-stop_words = set(stopwords.words('english')) # initialiseren van stopwoorden met Engelse stopwoorden
-lemmatizer = WordNetLemmatizer() # initialiseren van lemmatizer met WordNetLemmatizer
 
-def preprocess_text(text):
-    '''Preprocess tekst door te lowercasen en speciale tekens te verwijderen.'''
-    if pd.isna(text): # als tekst ontbreekt, return lege string
-        return"" 
-    text = text.lower() # tekst lowercase maken
-    text =re.sub(r'[^a-zA-Zà-ÿ\s]', ' ', text) # speciale tekens verwijderen 
-    return text 
+def _ensure_nltk_resource(resource: str, path: str) -> None:
+    try:
+        nltk.data.find(path)
+    except LookupError:
+        nltk.download(resource)
 
-def my_tokenizer(text):
-    '''Tokenize tekst, verwijder stopwoorden en lemmatize tokens.'''
-    tokens = word_tokenize(text) # tokenizen
-    tokens = [t for t in tokens if not re.fullmatch(r"x+", t.lower())] # verwijderen van tokens die alleen uit 'x' bestaan 
-    tokens = [t for t in tokens if t not in stop_words] # verwijderen van stopwoorden
-    tokens = [lemmatizer.lemmatize(t) for t in tokens] # lemmatizen
+
+_ensure_nltk_resource('punkt', 'tokenizers/punkt')
+_ensure_nltk_resource('stopwords', 'corpora/stopwords')
+_ensure_nltk_resource('wordnet', 'corpora/wordnet')
+
+BASIS_STOPWOORDEN = set(stopwords.words('english'))
+AANGEPASTE_STOPWOORDEN = {
+    'complaint', 'complaints', 'customer', 'company', 'department',
+    'dear', 'sir', 'madam', 'hello', 'regarding', 'subject',
+    'case', 'issue', 'thanks', 'thank', 'please', 'sincerely',
+    'accountnumber', 'team'
+}
+STOP_WOORDEN = BASIS_STOPWOORDEN.union(AANGEPASTE_STOPWOORDEN)
+LEMMATISATOR = WordNetLemmatizer()
+NORMALISATIES = {
+    r'\bcc\b': 'creditcard',
+    r'\bcc\.': 'creditcard',
+    r'\bacct\b': 'account',
+    r'\bacct\.': 'account',
+    r'\bach\b': 'automatedclearinghouse',
+    r'\btxn\b': 'transaction',
+    r'\bchk\b': 'checking',
+}
+SLEUTELWOORDEN = {
+    'bankrekening': [
+        'checking account', 'current account', 'debit card',
+        'atm', 'routing number', 'account closure',
+        'overdraft', 'direct deposit', 'wire transfer',
+        'bank statement'
+    ],
+    'consumentenkrediet': [
+        'personal loan', 'auto loan', 'installment loan',
+        'apr', 'finance charge', 'origination fee',
+        'balloon payment', 'cosigner', 'payday loan',
+        'loan term'
+    ],
+    'creditcard': [
+        'credit card', 'card issuer', 'balance transfer',
+        'cash advance', 'chip card', 'authorization hold',
+        'fraud alert', 'chargeback', 'minimum payment',
+        'card limit'
+    ],
+    'hypotheek': [
+        'mortgage', 'home loan', 'refinance',
+        'escrow', 'appraisal', 'loan modification',
+        'property tax', 'closing disclosure',
+        'underwriting', 'adjustable rate'
+    ],
+    'incasso': [
+        'collection agency', 'debt collector',
+        'harassment', 'validation notice',
+        'settlement offer', 'wage garnishment',
+        'collection call', 'cease communication',
+        'debt verification', 'collection lawsuit'
+    ],
+    'kredietregistratie': [
+        'credit bureau', 'credit report',
+        'experian', 'equifax', 'transunion',
+        'credit freeze', 'inquiry removal',
+        'tradeline update', 'dispute investigation',
+        'credit file'
+    ],
+}
+
+
+def preprocess_text(tekst: str) -> str:
+    if pd.isna(tekst):
+        return ''
+    if not isinstance(tekst, str):
+        tekst = str(tekst)
+    tekst = tekst.lower()
+    for patroon, vervanging in NORMALISATIES.items():
+        tekst = re.sub(patroon, vervanging, tekst)
+    tekst = re.sub(r'[^a-z\s]', ' ', tekst)
+    tekst = re.sub(r'\s+', ' ', tekst).strip()
+    return tekst
+
+
+def my_tokenizer(tekst: str):
+    tokens = word_tokenize(tekst)
+    tokens = [tok for tok in tokens if tok not in STOP_WOORDEN]
+    tokens = [LEMMATISATOR.lemmatize(tok) for tok in tokens]
     return tokens
 
-def load_dataset(path='klachten.csv'):
+
+def load_dataset(path='klachten.csv', include_answer=False):
     df = pd.read_csv(path).copy()
-    df = df.drop(columns=['ID', 'Datum_ontvangst', 'Antwoord_bedrijf'])
+    kolommen = ['ID', 'Datum_ontvangst']
+    if 'Antwoord_bedrijf' in df.columns and not include_answer:
+        kolommen.append('Antwoord_bedrijf')
+    
+    df = df.drop(columns = [kol for kol in kolommen if kol in df.columns])
     df = df.drop_duplicates(subset='Omschrijving', keep='first')
-    return df 
+    return df
+
 
 def get_all_tokens(df):
-    '''Functie die alle tokens teruggeeft'''
-    all_tokens = [] # lijst om alle tokens op te slaan
-    for text in df['Omschrijving']: 
-        clean = preprocess_text(text) # tekst preprocessen
-        tokens = my_tokenizer(clean) # tokenizen, stopwoorden verwijderen en lemmatizen
-        all_tokens.extend(tokens) # tokens toevoegen aan lijst
+    all_tokens = []
+    for text in df['Omschrijving']:
+        clean = preprocess_text(text)
+        tokens = my_tokenizer(clean)
+        all_tokens.extend(tokens)
     return all_tokens
 
+
 def get_tokens_for_product(df, product):
-    '''Functie die alle tokens voor een specifiek product teruggeeft'''
-    subset = df[df['Product'] == product]['Omschrijving'] # subset voor specifiek product
-    tokens = [] # lijst om tokens op te slaan
+    subset = df[df['Product'] == product]['Omschrijving']
+    tokens = []
     for text in subset:
-        clean = preprocess_text(text) # tekst preprocessen
-        tokens.extend(my_tokenizer(clean)) # tokenizen, stopwoorden verwijderen en lemmatizen
+        clean = preprocess_text(text)
+        tokens.extend(my_tokenizer(clean))
     return tokens
+
+
+def keyword_indicator(teksten):
+    serie = pd.Series(teksten).fillna('').str.lower()
+    kolommen = []
+    for woorden in SLEUTELWOORDEN.values():
+        patroon = r'(?:' + '|'.join(re.escape(w) for w in woorden) + r')'
+        kolommen.append(serie.str.count(patroon, regex=True).to_numpy(dtype=float))
+    if not kolommen:
+        return sparse.csr_matrix((len(serie), 0))
+    matrix = np.column_stack(kolommen)
+    return sparse.csr_matrix(matrix)
+
+
+def extra_kenmerken(teksten):
+    serie = pd.Series(teksten).fillna('')
+    lengtes = serie.str.len().to_numpy(dtype=float).reshape(-1, 1)
+    hoofdletters = serie.str.count(r'[A-Z]').to_numpy(dtype=float).reshape(-1, 1)
+    cijfers = serie.str.count(r'\d').to_numpy(dtype=float).reshape(-1, 1)
+    uitroeptekens = serie.str.count(r'!').to_numpy(dtype=float).reshape(-1, 1)
+    ratios = np.divide(
+        hoofdletters,
+        lengtes + 1e-6,
+        out=np.zeros_like(hoofdletters),
+        where=lengtes != 0
+    )
+    kenmerken = np.hstack([lengtes, hoofdletters, cijfers, uitroeptekens, ratios])
+    return sparse.csr_matrix(kenmerken)
+
+
+keyword_transformer = FunctionTransformer(keyword_indicator, validate=False)
+extra_transformer = FunctionTransformer(extra_kenmerken, validate=False)
