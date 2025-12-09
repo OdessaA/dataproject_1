@@ -39,45 +39,90 @@ NORMALISATIES = {
     r'\bchk\b': 'checking',
 }
 SLEUTELWOORDEN = {
-    'bankrekening': [
-        'checking account', 'current account', 'debit card',
-        'atm', 'routing number', 'account closure',
-        'overdraft', 'direct deposit', 'wire transfer',
-        'bank statement'
-    ],
-    'consumentenkrediet': [
-        'personal loan', 'auto loan', 'installment loan',
-        'apr', 'finance charge', 'origination fee',
-        'balloon payment', 'cosigner', 'payday loan',
-        'loan term'
-    ],
-    'creditcard': [
-        'credit card', 'card issuer', 'balance transfer',
-        'cash advance', 'chip card', 'authorization hold',
-        'fraud alert', 'chargeback', 'minimum payment',
-        'card limit'
-    ],
-    'hypotheek': [
-        'mortgage', 'home loan', 'refinance',
-        'escrow', 'appraisal', 'loan modification',
-        'property tax', 'closing disclosure',
-        'underwriting', 'adjustable rate'
+    'kredietregistratie': [
+        'equifax',
+        'experian',
+        'transunion',
+        'bureau',
+        'tradeline',
+        'inquiry',
+        'public record',
+        'credit score',
+        'credit file',
+        'credit reporting',
+        'reinvestigation',
+        'furnisher',
     ],
     'incasso': [
-        'collection agency', 'debt collector',
-        'harassment', 'validation notice',
-        'settlement offer', 'wage garnishment',
-        'collection call', 'cease communication',
-        'debt verification', 'collection lawsuit'
+        'collection',
+        'collection agency',
+        'debt collector',
+        'collection account',
+        'garnishment',
+        'harassment',
+        'settlement',
+        'validation',
+        'threatening',
+        'third party',
     ],
-    'kredietregistratie': [
-        'credit bureau', 'credit report',
-        'experian', 'equifax', 'transunion',
-        'credit freeze', 'inquiry removal',
-        'tradeline update', 'dispute investigation',
-        'credit file'
+    'hypotheek': [
+        'mortgage',
+        'foreclosure',
+        'escrow',
+        'escrow account',
+        'property',
+        'short sale',
+        'loan modification',
+        'home loan',
+        'appraisal',
+        'closing',
+        'refinance',
+        'reverse mortgage',
+    ],
+    'creditcard': [
+        'credit card',
+        'cardmember',
+        'charge',
+        'transaction',
+        'purchase',
+        'merchant',
+        'chargeback',
+        'swipe',
+        'chip',
+        'card limit',
+        'annual fee',
+        'cashback',
+    ],
+    'consumentenkrediet': [
+        'loan',
+        'vehicle',
+        'auto',
+        'car',
+        'dealership',
+        'auto finance',
+        'deficiency balance',
+        'repossession',
+        'trade-in',
+        'odometer',
+        'balloon payment',
+        'extended warranty',
+    ],
+    'bankrekening': [
+        'checking',
+        'savings',
+        'deposit',
+        'overdraft',
+        'direct deposit',
+        'atm',
+        'withdrawal',
+        'wire',
+        'transfer',
+        'branch',
+        'teller',
+        'debit card',
     ],
 }
+
 
 
 def preprocess_text(tekst: str) -> str:
@@ -134,7 +179,7 @@ def keyword_indicator(teksten):
     kolommen = []
     for woorden in SLEUTELWOORDEN.values():
         patroon = r'(?:' + '|'.join(re.escape(w) for w in woorden) + r')'
-        kolommen.append(serie.str.count(patroon, regex=True).to_numpy(dtype=float))
+        kolommen.append(serie.str.count(patroon).to_numpy(dtype=float))
     if not kolommen:
         return sparse.csr_matrix((len(serie), 0))
     matrix = np.column_stack(kolommen)
