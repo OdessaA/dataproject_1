@@ -1,31 +1,41 @@
-#preprocessing.py
-import pandas as pd
+import spacy
 import re
-from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
+import pandas as pd
 
-# Stopwoorden + lemmatizer
-stop_words = set(stopwords.words("english"))
-lemmatizer = WordNetLemmatizer()
+# Laad SpaCy
+nlp = spacy.load("en_core_web_sm", disable=["ner", "parser"])  
 
-
-def my_preprocessor(text):
+def spacy_preprocessor(text):
     if pd.isna(text):
         return ""
-    text = str(text).lower()
+    
+    # lowercase + basis schoonmaak
+    text = text.lower()
     text = re.sub(r"[^\w\s]+", " ", text)
     text = re.sub(r"\d+", " ", text)
     text = re.sub(r"\s+", " ", text).strip()
     return text
 
 
+def spacy_tokenizer(text):
+    text = spacy_preprocessor(text)
+    doc = nlp(text)
 
-def my_tokenizer(text):
-    tokens = word_tokenize(my_preprocessor(text))
-    tokens = [t for t in tokens if t not in stop_words]
-    
-    # verwijder tokens zoals "x", "xx", "xxx", "xxxx", in lowercase of uppercase
-    tokens = [t for t in tokens if not re.fullmatch(r"x+", t, flags=re.IGNORECASE)]
-    
-    return [lemmatizer.lemmatize(t, pos="v") for t in tokens]
+    tokens = []
+    for token in doc:
+        if token.is_stop:
+            continue
+        if token.is_punct:
+            continue
+        if token.is_space:
+            continue
+
+        # verwijder xxx, XXXX etc.
+        if re.fullmatch(r"x+", token.text, flags=re.IGNORECASE):
+            continue
+
+        lemma = token.lemma_.strip()
+        if len(lemma) > 1:
+            tokens.append(lemma)
+
+    return tokens
