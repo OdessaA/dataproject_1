@@ -7,9 +7,9 @@ from preprocessing import(
 )
 
 def load_dataset(path="klachten.csv"):
-    df = pd.read_csv(path).copy()
-    df = df.drop(columns=["ID", "Datum_ontvangst", "Antwoord_bedrijf"])
-    df = df.drop_duplicates(subset='Omschrijving', keep='first')
+    df = pd.read_csv(path, index_col="ID")
+    df = df.drop(columns=["Datum_ontvangst", "Antwoord_bedrijf"])
+    df = df.drop_duplicates(subset="Omschrijving", keep="first")
     return df
 
 def get_all_tokens(df):
