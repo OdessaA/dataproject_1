@@ -1,5 +1,10 @@
-klachten_profile.html
-notes.ipynb
-test.ipynb
-resultaten
-__pycache__
+# Virtual environments
+.venv/
+.venv311/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
