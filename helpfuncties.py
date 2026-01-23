@@ -7,11 +7,9 @@ from preprocessing import(
     spacy_tokenizer,
 )
 
-
 def load_dataset(path="klachten.csv"):
-    ''' Laad dataset in en verwijder onnodige kolommen en dubbele klachten.'''
+    ''' Laad dataset in en verwijder dubbele klachten.'''
     df = pd.read_csv(path, index_col="ID") # ID als indexkolom
-    df = df.drop(columns=["Datum_ontvangst", "Antwoord_bedrijf"]) #Verwijder kolommen die niet gebruikt worden voor modeltraining 
     df = df.drop_duplicates(subset="Omschrijving", keep="first") # Verwijder dubbele klachten op basis van Omschrijving kolom, behoud de eerste
     return df 
 
