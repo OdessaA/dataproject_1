@@ -7,10 +7,10 @@ _nlp = None
 
 def get_nlp():
     ''' Laad en retourneer het SpaCy NLP model.'''
-    global _nlp # gebruik de globale variabele _nlp
-    if _nlp is None: # als het model nog niet is geladen
-        import spacy # importeer spacy
-        _nlp = spacy.load("en_core_web_sm", disable=["ner", "parser"]) # laad het Engelse model zonder NER en parser voor snellere verwerking
+    global _nlp 
+    if _nlp is None: # als het model nog niet is geladen dan import spacy
+        import spacy 
+        _nlp = spacy.load("en_core_web_sm", disable=["ner", "parser"]) 
     return _nlp
 
 
@@ -31,9 +31,9 @@ def spacy_tokenizer(text):
     text = spacy_preprocessor(text) # Basis preprocessing toepassen
     doc = get_nlp()(text) # verwerk de tekst met SpaCy tot een Doc object
 
-    tokens = [] # lijst om de tokens in op te slaan
+    tokens = [] 
 
-    # Loop over alle tokens die SpaCy herkent 
+    # Loop over alle tokens die SpaCy herkent en voeg de tokens die onder stopwoorden, leestekens en spaties vallen niet toe aan eindtokens
     for token in doc:
         if token.is_stop: # stopwoorden overslaan
             continue
