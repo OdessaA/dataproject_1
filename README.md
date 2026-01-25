@@ -10,7 +10,7 @@ De dataset `klachten.csv`, die is ontvangen van de opdrachtgever, bevat 14.887 r
 Deze dataset wordt gebruikt voor de ontwikkeling van een automatisch tekstclassificatiemodel.
 
 ### Data Dictionary
-![alt text](image.png)
+![Data dictionary](afbeeldingen/DataDictionary.png)
 
 ## Bestandstructuur
 In de map `afbeeldingen` staan de confusion matrices van alle getrainde modellen en de Data Dictionary. 
