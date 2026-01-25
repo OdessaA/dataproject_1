@@ -13,7 +13,7 @@ Deze dataset wordt gebruikt voor de ontwikkeling van een automatisch tekstclassi
 ![alt text](image.png)
 
 ## Bestandstructuur
-In de map `afbeeldingen` staan de confusion matrices van alle getrainde modellen.  
+In de map `afbeeldingen` staan de confusion matrices van alle getrainde modellen en de Data Dictionary. 
 De map `data` bevat alle CSV-bestanden die binnen dit project zijn gebruikt of gegenereerd.
 
 In `01_EDA.ipynb` wordt de Exploratory Data Analysis uitgevoerd.  
