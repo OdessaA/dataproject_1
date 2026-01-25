@@ -7,7 +7,7 @@ from preprocessing import(
     spacy_tokenizer,
 )
 
-def load_dataset(path="klachten.csv"):
+def load_dataset(path="data/klachten.csv"):
     ''' Laad dataset in en verwijder dubbele klachten.'''
     df = pd.read_csv(path, index_col="ID") # ID als indexkolom
     df = df.drop_duplicates(subset="Omschrijving", keep="first") # Verwijder dubbele klachten op basis van Omschrijving kolom, behoud de eerste
