@@ -30,6 +30,18 @@ Binnen het project zijn twee Python-modules aangemaakt:
   Bevat functies voor tekstpreprocessing met SpaCy, waaronder opschoning, tokenization en lemmatization.
 
 ## Environment
-- Python 3.9.19
+Voor dit project zijn twee afzonderlijke Python-omgevingen gebruikt.
+
+### Klassieke modellen
+Voor de klassieke machine-learning modellen (Logistic Regression, Naive Bayes, SGDClassifier en Random Forest) is gebruikgemaakt van:
+- Python 3.13.9
 - Besturingssysteem: Windows
-- Packageversies: zie `requirements.txt`
+- Requirements: requirements_klassiek.txt
+
+### FinBERT 
+Voor het FinBERT-model is een aparte omgeving opgezet vanwege de afhankelijkheid van PyTorch en Hugging Face:
+- Python 3.12.10
+- Besturingssysteem: Windows
+- Requirements: requirements_finbert.txt
+
+Deze omgeving bevat onder andere transformers, datasets, accelerate en PyTorch (met CUDA-ondersteuning) voor het trainen en evalueren van het FinBERT-model.
