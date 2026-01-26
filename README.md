@@ -49,7 +49,7 @@ Deze omgeving bevat onder andere transformers, datasets, accelerate en PyTorch (
 ## Gebruiksaanwijzing 
 1. - Voor notebooks 01 t/m 06: maak een venv met Python 3.13.9 en installeer hierin requirements_klassiek.txt
    - Voor notebook 07: maak een venv met Python 3.12.10 en installeer hierin requirements_finbert.txt 
-2. Voor de EDA en tekst exploratie, open notebooks 01 en 02. 
+2. Voor de EDA en tekst exploratie, open en run notebooks 01 en 02. 
 3. Voor het trainen en evalueren van de klassieke modellen, run notebooks 03 t/m 06 met de 3.13.9 venv. 
 4. Voor het trainen en evalueren van het FinBERT model, run notebook 07 met de 3.12.10 venv. 
 
