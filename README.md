@@ -45,3 +45,12 @@ Voor het FinBERT-model is een aparte omgeving opgezet vanwege de afhankelijkheid
 - Requirements: requirements_finbert.txt
 
 Deze omgeving bevat onder andere transformers, datasets, accelerate en PyTorch (met CUDA-ondersteuning) voor het trainen en evalueren van het FinBERT-model.
+
+## Gebruiksaanwijzing 
+1. - Voor notebooks 01 t/m 06: maak een venv met Python 3.13.9 en installeer hierin requirements_klassiek.txt
+   - Voor notebook 07: maak een venv met Python 3.12.10 en installeer hierin requirements_finbert.txt 
+2. Voor de EDA en tekst exploratie, open notebooks 01 en 02. 
+3. Voor het trainen en evalueren van de klassieke modellen, run notebooks 03 t/m 06 met de 3.13.9 venv. 
+4. Voor het trainen en evalueren van het FinBERT model, run notebook 07 met de 3.12.10 venv. 
+
+Er hoeft niets aangepast te worden in de code om het te kunnen runnen vanaf een ander apparaat. Het enige belangrijke punt is het correct installeren van de venv's en de packages. 
